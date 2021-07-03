@@ -1,4 +1,4 @@
-<p align="center"><img src="/art/logo.svg" alt="Logo Laravel Breeze"></p>
+<p align="center"><img src="https://raw.githubusercontent.com/mralston/bootstrap-breeze/master/art/logo.svg" alt="Logo Laravel Breeze"></p>
 
 <p align="center">
     <a href="https://packagist.org/packages/mralston/bootstrap-breeze">
