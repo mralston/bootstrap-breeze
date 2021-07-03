@@ -30,11 +30,19 @@ cd my-app
 composer require mralston/bootstrap-breeze --dev
 
 php artisan breeze:install vue-bootstrap
+
+npm install && npm run dev
+```
+
+Configure your database connection in the `.env` file, then:
+
+```
+php artisan migrate
 ```
 
 ## Contributing
 
-Thank you for considering contributing to Breeze! You can read the contribution guide [here](.github/CONTRIBUTING.md).
+You can read the contribution guide for Laravel [here](https://laravel.com/docs/8.x/contributions).
 
 ## Code of Conduct
 
@@ -42,7 +50,7 @@ In order to ensure that the Laravel community is welcoming to all, please review
 
 ## Security Vulnerabilities
 
-Please review [our security policy](https://github.com/laravel/breeze/security/policy) on how to report security vulnerabilities.
+Please review [the Laravel security policy](https://github.com/laravel/breeze/security/policy) on how to report security vulnerabilities.
 
 ## License
 
