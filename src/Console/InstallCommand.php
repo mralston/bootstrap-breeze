@@ -1,6 +1,6 @@
 <?php
 
-namespace Laravel\Breeze\Console;
+namespace Mralston\BootstrapBreeze\Console;
 
 use Illuminate\Console\Command;
 use Illuminate\Filesystem\Filesystem;
@@ -14,7 +14,7 @@ class InstallCommand extends Command
      *
      * @var string
      */
-    protected $signature = 'breeze:install {stack=blade : The development stack that should be installed (blade,react,vue)}
+    protected $signature = 'bootstrap-breeze:install {stack=blade : The development stack that should be installed (blade,react,vue)}
                             {--inertia : Indicate that the Vue Inertia stack should be installed (Deprecated)}
                             {--composer=global : Absolute path to the Composer binary which should be used to install packages}';
 
@@ -32,146 +32,71 @@ class InstallCommand extends Command
      */
     public function handle()
     {
-        if ($this->argument('stack') === 'vue-bootstrap') {
+        if ($this->option('inertia') || $this->argument('stack') === 'vue') {
             return $this->installInertiaVueBootstrapStack();
         }
 
-        if ($this->option('inertia') || $this->argument('stack') === 'vue') {
-            return $this->installInertiaVueStack();
-        }
-
         if ($this->argument('stack') === 'react') {
+            throw new \Exception('React stack not supported by Bootstrap Breeze. Please use breeze:install');
             return $this->installInertiaReactStack();
         }
 
+        return $this->installBladeStack();
+    }
+
+    protected function installBladeStack()
+    {
         // NPM Packages...
         $this->updateNodePackages(function ($packages) {
             return [
-                '@tailwindcss/forms' => '^0.2.1',
-                'alpinejs' => '^2.7.3',
-                'autoprefixer' => '^10.1.0',
-                'postcss' => '^8.2.1',
-                'postcss-import' => '^12.0.1',
-                'tailwindcss' => '^2.0.2',
-            ] + $packages;
+                    'alpinejs' => '^2.7.3',
+                    'autoprefixer' => '^10.1.0',
+                    'postcss' => '^8.2.1',
+                    'postcss-import' => '^12.0.1',
+                    'bootstrap' => '^5.0.2',
+                ] + $packages;
         });
 
         // Controllers...
         (new Filesystem)->ensureDirectoryExists(app_path('Http/Controllers/Auth'));
-        (new Filesystem)->copyDirectory(__DIR__.'/../../stubs/default/App/Http/Controllers/Auth', app_path('Http/Controllers/Auth'));
+        (new Filesystem)->copyDirectory(base_path('vendor').'/laravel/breeze/stubs/default/App/Http/Controllers/Auth', app_path('Http/Controllers/Auth'));
 
         // Requests...
         (new Filesystem)->ensureDirectoryExists(app_path('Http/Requests/Auth'));
-        (new Filesystem)->copyDirectory(__DIR__.'/../../stubs/default/App/Http/Requests/Auth', app_path('Http/Requests/Auth'));
+        (new Filesystem)->copyDirectory(base_path('vendor').'/laravel/breeze/stubs/default/App/Http/Requests/Auth', app_path('Http/Requests/Auth'));
 
         // Views...
         (new Filesystem)->ensureDirectoryExists(resource_path('views/auth'));
         (new Filesystem)->ensureDirectoryExists(resource_path('views/layouts'));
         (new Filesystem)->ensureDirectoryExists(resource_path('views/components'));
 
-        (new Filesystem)->copyDirectory(__DIR__.'/../../stubs/default/resources/views/auth', resource_path('views/auth'));
-        (new Filesystem)->copyDirectory(__DIR__.'/../../stubs/default/resources/views/layouts', resource_path('views/layouts'));
-        (new Filesystem)->copyDirectory(__DIR__.'/../../stubs/default/resources/views/components', resource_path('views/components'));
+        (new Filesystem)->copyDirectory(base_path('vendor').'/laravel/breeze/stubs/default/resources/views/auth', resource_path('views/auth'));
+        (new Filesystem)->copyDirectory(base_path('vendor').'/laravel/breeze/stubs/default/resources/views/layouts', resource_path('views/layouts'));
+        (new Filesystem)->copyDirectory(base_path('vendor').'/laravel/breeze/stubs/default/resources/views/components', resource_path('views/components'));
 
-        copy(__DIR__.'/../../stubs/default/resources/views/dashboard.blade.php', resource_path('views/dashboard.blade.php'));
+        copy(base_path('vendor').'/laravel/breeze/stubs/default/resources/views/dashboard.blade.php', resource_path('views/dashboard.blade.php'));
 
         // Components...
         (new Filesystem)->ensureDirectoryExists(app_path('View/Components'));
-        (new Filesystem)->copyDirectory(__DIR__.'/../../stubs/default/App/View/Components', app_path('View/Components'));
+        (new Filesystem)->copyDirectory(base_path('vendor').'/laravel/breeze/stubs/default/App/View/Components', app_path('View/Components'));
 
         // Tests...
-        (new Filesystem)->copyDirectory(__DIR__.'/../../stubs/default/tests/Feature', base_path('tests/Feature'));
+        (new Filesystem)->copyDirectory(base_path('vendor').'/laravel/breeze/stubs/default/tests/Feature', base_path('tests/Feature'));
 
         // Routes...
-        copy(__DIR__.'/../../stubs/default/routes/web.php', base_path('routes/web.php'));
-        copy(__DIR__.'/../../stubs/default/routes/auth.php', base_path('routes/auth.php'));
+        copy(base_path('vendor').'/laravel/breeze/stubs/default/routes/web.php', base_path('routes/web.php'));
+        copy(base_path('vendor').'/laravel/breeze/stubs/default/routes/auth.php', base_path('routes/auth.php'));
 
         // "Dashboard" Route...
         $this->replaceInFile('/home', '/dashboard', resource_path('views/welcome.blade.php'));
         $this->replaceInFile('Home', 'Dashboard', resource_path('views/welcome.blade.php'));
         $this->replaceInFile('/home', '/dashboard', app_path('Providers/RouteServiceProvider.php'));
 
-        // Tailwind / Webpack...
-        copy(__DIR__.'/../../stubs/default/tailwind.config.js', base_path('tailwind.config.js'));
-        copy(__DIR__.'/../../stubs/default/webpack.mix.js', base_path('webpack.mix.js'));
-        copy(__DIR__.'/../../stubs/default/resources/css/app.css', resource_path('css/app.css'));
-        copy(__DIR__.'/../../stubs/default/resources/js/app.js', resource_path('js/app.js'));
-
-        $this->info('Breeze scaffolding installed successfully.');
-        $this->comment('Please execute the "npm install && npm run dev" command to build your assets.');
-    }
-
-    /**
-     * Install the Inertia Vue Breeze stack.
-     *
-     * @return void
-     */
-    protected function installInertiaVueStack()
-    {
-        // Install Inertia...
-        $this->requireComposerPackages('inertiajs/inertia-laravel:^0.4.1', 'laravel/sanctum:^2.6', 'tightenco/ziggy:^1.0');
-
-        // NPM Packages...
-        $this->updateNodePackages(function ($packages) {
-            return [
-                '@inertiajs/inertia' => '^0.9.0',
-                '@inertiajs/inertia-vue3' => '^0.4.0',
-                '@inertiajs/progress' => '^0.2.4',
-                '@tailwindcss/forms' => '^0.2.1',
-                '@vue/compiler-sfc' => '^3.0.5',
-                'autoprefixer' => '^10.2.4',
-                'postcss' => '^8.2.13',
-                'postcss-import' => '^14.0.1',
-                'tailwindcss' => '^2.1.2',
-                'vue' => '^3.0.5',
-                'vue-loader' => '^16.1.2',
-            ] + $packages;
-        });
-
-        // Controllers...
-        (new Filesystem)->ensureDirectoryExists(app_path('Http/Controllers/Auth'));
-        (new Filesystem)->copyDirectory(__DIR__.'/../../stubs/inertia-common/app/Http/Controllers/Auth', app_path('Http/Controllers/Auth'));
-
-        // Requests...
-        (new Filesystem)->ensureDirectoryExists(app_path('Http/Requests/Auth'));
-        (new Filesystem)->copyDirectory(__DIR__.'/../../stubs/default/App/Http/Requests/Auth', app_path('Http/Requests/Auth'));
-
-        // Middleware...
-        $this->installMiddlewareAfter('SubstituteBindings::class', '\App\Http\Middleware\HandleInertiaRequests::class');
-
-        copy(__DIR__.'/../../stubs/inertia-common/app/Http/Middleware/HandleInertiaRequests.php', app_path('Http/Middleware/HandleInertiaRequests.php'));
-
-        // Views...
-        copy(__DIR__.'/../../stubs/inertia-common/resources/views/app.blade.php', resource_path('views/app.blade.php'));
-
-        // Components + Pages...
-        (new Filesystem)->ensureDirectoryExists(resource_path('js/Components'));
-        (new Filesystem)->ensureDirectoryExists(resource_path('js/Layouts'));
-        (new Filesystem)->ensureDirectoryExists(resource_path('js/Pages'));
-
-        (new Filesystem)->copyDirectory(__DIR__.'/../../stubs/inertia-vue/resources/js/Components', resource_path('js/Components'));
-        (new Filesystem)->copyDirectory(__DIR__.'/../../stubs/inertia-vue/resources/js/Layouts', resource_path('js/Layouts'));
-        (new Filesystem)->copyDirectory(__DIR__.'/../../stubs/inertia-vue/resources/js/Pages', resource_path('js/Pages'));
-
-        // Tests...
-        (new Filesystem)->copyDirectory(__DIR__.'/../../stubs/default/tests/Feature', base_path('tests/Feature'));
-
-        // Routes...
-        copy(__DIR__.'/../../stubs/inertia-common/routes/web.php', base_path('routes/web.php'));
-        copy(__DIR__.'/../../stubs/inertia-common/routes/auth.php', base_path('routes/auth.php'));
-
-        // "Dashboard" Route...
-        $this->replaceInFile('/home', '/dashboard', resource_path('js/Pages/Welcome.vue'));
-        $this->replaceInFile('Home', 'Dashboard', resource_path('js/Pages/Welcome.vue'));
-        $this->replaceInFile('/home', '/dashboard', app_path('Providers/RouteServiceProvider.php'));
-
-        // Tailwind / Webpack...
-        copy(__DIR__.'/../../stubs/inertia-common/tailwind.config.js', base_path('tailwind.config.js'));
-        copy(__DIR__.'/../../stubs/inertia-common/webpack.mix.js', base_path('webpack.mix.js'));
-        copy(__DIR__.'/../../stubs/inertia-common/webpack.config.js', base_path('webpack.config.js'));
-        copy(__DIR__.'/../../stubs/inertia-common/jsconfig.json', base_path('jsconfig.json'));
-        copy(__DIR__.'/../../stubs/inertia-common/resources/css/app.css', resource_path('css/app.css'));
-        copy(__DIR__.'/../../stubs/inertia-vue/resources/js/app.js', resource_path('js/app.js'));
+        // Bootstrap / Webpack...
+        copy(__DIR__.'/../../stubs/blade/webpack.mix.js', base_path('webpack.mix.js'));
+        copy(__DIR__.'/../../stubs/blade/resources/css/app.css', resource_path('css/app.css'));
+        copy(__DIR__.'/../../stubs/blade/resources/js/app.js', resource_path('js/app.js'));
+        copy(__DIR__.'/../../stubs/blade/resources/js/bootstrap.js', resource_path('js/bootstrap.js'));
 
         $this->info('Breeze scaffolding installed successfully.');
         $this->comment('Please execute the "npm install && npm run dev" command to build your assets.');
@@ -205,19 +130,19 @@ class InstallCommand extends Command
 
         // Controllers...
         (new Filesystem)->ensureDirectoryExists(app_path('Http/Controllers/Auth'));
-        (new Filesystem)->copyDirectory(__DIR__.'/../../stubs/inertia-common/app/Http/Controllers/Auth', app_path('Http/Controllers/Auth'));
+        (new Filesystem)->copyDirectory(base_path('vendor').'/laravel/breeze/stubs/inertia-common/app/Http/Controllers/Auth', app_path('Http/Controllers/Auth'));
 
         // Requests...
         (new Filesystem)->ensureDirectoryExists(app_path('Http/Requests/Auth'));
-        (new Filesystem)->copyDirectory(__DIR__.'/../../stubs/default/App/Http/Requests/Auth', app_path('Http/Requests/Auth'));
+        (new Filesystem)->copyDirectory(base_path('vendor').'/laravel/breeze/stubs/default/App/Http/Requests/Auth', app_path('Http/Requests/Auth'));
 
         // Middleware...
         $this->installMiddlewareAfter('SubstituteBindings::class', '\App\Http\Middleware\HandleInertiaRequests::class');
 
-        copy(__DIR__.'/../../stubs/inertia-common/app/Http/Middleware/HandleInertiaRequests.php', app_path('Http/Middleware/HandleInertiaRequests.php'));
+        copy(base_path('vendor').'/laravel/breeze/stubs/inertia-common/app/Http/Middleware/HandleInertiaRequests.php', app_path('Http/Middleware/HandleInertiaRequests.php'));
 
         // Views...
-        copy(__DIR__.'/../../stubs/inertia-common/resources/views/app.blade.php', resource_path('views/app.blade.php'));
+        copy(base_path('vendor').'/laravel/breeze/stubs/inertia-common/resources/views/app.blade.php', resource_path('views/app.blade.php'));
 
         // Components + Pages...
         (new Filesystem)->ensureDirectoryExists(resource_path('js/Components'));
@@ -229,11 +154,11 @@ class InstallCommand extends Command
         (new Filesystem)->copyDirectory(__DIR__.'/../../stubs/inertia-vue-bootstrap/resources/js/Pages', resource_path('js/Pages'));
 
         // Tests...
-        (new Filesystem)->copyDirectory(__DIR__.'/../../stubs/default/tests/Feature', base_path('tests/Feature'));
+        (new Filesystem)->copyDirectory(base_path('vendor').'/laravel/breeze/stubs/default/tests/Feature', base_path('tests/Feature'));
 
         // Routes...
-        copy(__DIR__.'/../../stubs/inertia-common/routes/web.php', base_path('routes/web.php'));
-        copy(__DIR__.'/../../stubs/inertia-common/routes/auth.php', base_path('routes/auth.php'));
+        copy(base_path('vendor').'/laravel/breeze/stubs/inertia-common/routes/web.php', base_path('routes/web.php'));
+        copy(base_path('vendor').'/laravel/breeze/stubs/inertia-common/routes/auth.php', base_path('routes/auth.php'));
 
         // "Dashboard" Route...
         $this->replaceInFile('/home', '/dashboard', resource_path('js/Pages/Welcome.vue'));
@@ -241,8 +166,8 @@ class InstallCommand extends Command
         $this->replaceInFile('/home', '/dashboard', app_path('Providers/RouteServiceProvider.php'));
 
         // Bootstrap / Webpack...
-        copy(__DIR__.'/../../stubs/inertia-common/webpack.config.js', base_path('webpack.config.js'));
-        copy(__DIR__.'/../../stubs/inertia-common/jsconfig.json', base_path('jsconfig.json'));
+        copy(base_path('vendor').'/laravel/breeze/stubs/inertia-common/webpack.config.js', base_path('webpack.config.js'));
+        copy(base_path('vendor').'/laravel/breeze/stubs/inertia-common/jsconfig.json', base_path('jsconfig.json'));
         copy(__DIR__.'/../../stubs/inertia-vue-bootstrap/webpack.mix.js', base_path('webpack.mix.js'));
         copy(__DIR__.'/../../stubs/inertia-vue-bootstrap/resources/css/app.css', resource_path('css/app.css'));
         copy(__DIR__.'/../../stubs/inertia-vue-bootstrap/resources/js/app.js', resource_path('js/app.js'));
@@ -254,6 +179,7 @@ class InstallCommand extends Command
 
     /**
      * Install the Inertia React Breeze stack.
+     * TODO: Convert to Bootstrap
      *
      * @return void
      */

@@ -16,9 +16,9 @@
 
 Breeze provides a minimal and simple starting point for building a Laravel application with authentication. Breeze publishes authentication controllers and views to your application that can be easily customized based on your own application's needs.
 
-Bootstrap Breeze is powered by Inertia, Vue and Bootstrap. If you're looking for a more robust Laravel starter kit that includes two factor authentication, Livewire / Inertia support, and more, check out [Laravel Jetstream](https://jetstream.laravel.com).
+Bootstrap Breeze is powered by Blade or Inertia/Vue & Bootstrap. If you're looking for a more robust Laravel starter kit that includes two factor authentication, Livewire / Inertia support, and more, check out [Laravel Jetstream](https://jetstream.laravel.com).
 
-This package is based on [Laravel Breeze](https://laravel.com/docs/8.x/starter-kits#laravel-breeze) ([laravel/breeze](https://github.com/laravel/breeze)) by Taylor Otwell.
+This unofficial package is based on [Laravel Breeze](https://laravel.com/docs/8.x/starter-kits#laravel-breeze) ([laravel/breeze](https://github.com/laravel/breeze)) by Taylor Otwell.
 
 Getting started couldn't be easier:
 
@@ -29,7 +29,7 @@ cd my-app
 
 composer require mralston/bootstrap-breeze --dev
 
-php artisan breeze:install vue-bootstrap
+php artisan bootstrap-breeze # or php artisan bootstrap-breeze vue
 
 npm install && npm run dev
 ```
