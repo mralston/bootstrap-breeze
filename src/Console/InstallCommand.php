@@ -75,6 +75,7 @@ class InstallCommand extends Command
         (new Filesystem)->copyDirectory(base_path('vendor').'/laravel/breeze/stubs/default/resources/views/components', resource_path('views/components'));
 
         copy(base_path('vendor').'/laravel/breeze/stubs/default/resources/views/dashboard.blade.php', resource_path('views/dashboard.blade.php'));
+        copy(base_path('vendor').'/laravel/breeze/stubs/default/resources/views/dashboard.blade.php', resource_path('views/dashboard.blade.php'));
 
         // Components...
         (new Filesystem)->ensureDirectoryExists(app_path('View/Components'));
@@ -93,10 +94,10 @@ class InstallCommand extends Command
         $this->replaceInFile('/home', '/dashboard', app_path('Providers/RouteServiceProvider.php'));
 
         // Bootstrap / Webpack...
-        copy(__DIR__.'/../../stubs/blade/webpack.mix.js', base_path('webpack.mix.js'));
-        copy(__DIR__.'/../../stubs/blade/resources/css/app.css', resource_path('css/app.css'));
-        copy(__DIR__.'/../../stubs/blade/resources/js/app.js', resource_path('js/app.js'));
-        copy(__DIR__.'/../../stubs/blade/resources/js/bootstrap.js', resource_path('js/bootstrap.js'));
+        copy(__DIR__.'/../../stubs/default/webpack.mix.js', base_path('webpack.mix.js'));
+        copy(__DIR__.'/../../stubs/default/resources/css/app.css', resource_path('css/app.css'));
+        copy(__DIR__.'/../../stubs/default/resources/js/app.js', resource_path('js/app.js'));
+        copy(__DIR__.'/../../stubs/default/resources/js/bootstrap.js', resource_path('js/bootstrap.js'));
 
         $this->info('Breeze scaffolding installed successfully.');
         $this->comment('Please execute the "npm install && npm run dev" command to build your assets.');
