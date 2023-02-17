@@ -1,17 +1,3 @@
-<p align="center"><img src="https://raw.githubusercontent.com/mralston/bootstrap-breeze/master/art/logo.svg" alt="Logo Laravel Breeze"></p>
-
-<p align="center">
-    <a href="https://packagist.org/packages/mralston/bootstrap-breeze">
-        <img src="https://img.shields.io/packagist/dt/mralston/bootstrap-breeze" alt="Total Downloads">
-    </a>
-    <a href="https://packagist.org/packages/mralston/bootstrap-breeze">
-        <img src="https://img.shields.io/packagist/v/mralston/bootstrap-breeze" alt="Latest Stable Version">
-    </a>
-    <a href="https://packagist.org/packages/mralston/bootstrap-breeze">
-        <img src="https://img.shields.io/packagist/l/mralston/bootstrap-breeze" alt="License">
-    </a>
-</p>
-
 ## Introduction
 
 Breeze provides a minimal and simple starting point for building a Laravel application with authentication. Breeze publishes authentication controllers and views to your application that can be easily customized based on your own application's needs.
